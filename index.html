@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Cable Calc">
+  <title>E-Fix Cable Calculator</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f1f5f9;color:#1e293b;min-height:100vh}
+    #app{max-width:480px;margin:0 auto;padding:12px 12px 40px}
+    .header{background:linear-gradient(135deg,#1e293b,#334155);color:#fff;border-radius:16px;padding:18px 20px;margin-bottom:16px}
+    .header h1{font-size:20px;font-weight:800;letter-spacing:-0.3px}
+    .header p{font-size:12px;color:#94a3b8;margin-top:3px}
+    .card{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+    .card-title{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px}
+    label{display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px}
+    input,select{width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:15px;color:#1e293b;background:#fff;-webkit-appearance:none;appearance:none;outline:none}
+    input:focus,select:focus{border-color:#2563eb}
+    .field{margin-bottom:12px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+    .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+    .toggle-row{display:flex;gap:8px;margin-bottom:12px}
+    .toggle-btn{flex:1;padding:9px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:13px;font-weight:600;color:#475569;background:#f8fafc;cursor:pointer;text-align:center;transition:all .15s}
+    .toggle-btn.active{background:#2563eb;color:#fff;border-color:#2563eb}
+    .result-card{border-radius:14px;padding:16px;margin-bottom:10px}
+    .result-card.pass{background:#f0fdf4;border:1.5px solid #86efac}
+    .result-card.fail{background:#fef2f2;border:1.5px solid #fca5a5}
+    .result-card.info{background:#f8fafc;border:1.5px solid #e2e8f0}
+    .result-card.warn{background:#fffbeb;border:1.5px solid #fde68a}
+    .result-label{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px}
+    .result-value{font-size:26px;font-weight:800;color:#1e293b;line-height:1}
+    .result-unit{font-size:13px;font-weight:600;color:#64748b;margin-top:2px}
+    .result-note{font-size:11px;color:#64748b;margin-top:4px}
+    .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+    .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+    .badge-pass{background:#dcfce7;color:#15803d}
+    .badge-fail{background:#fee2e2;color:#dc2626}
+    .badge-warn{background:#fef3c7;color:#d97706}
+    .divider{height:1px;background:#f1f5f9;margin:12px 0}
+    .section-head{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.8px;margin:16px 0 10px}
+    .empty-result{text-align:center;padding:30px 20px;color:#94a3b8;font-size:14px}
+    .calc-btn{width:100%;padding:14px;background:#2563eb;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:4px}
+    .calc-btn:active{background:#1d4ed8}
+    .cable-size-big{font-size:48px;font-weight:900;color:#1e293b;line-height:1}
+    .cable-size-unit{font-size:18px;font-weight:700;color:#64748b}
+    .warning-box{background:#fffbeb;border:1.5px solid #fde68a;border-radius:12px;padding:12px;margin-bottom:10px;font-size:12px;color:#92400e}
+    .info-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:13px}
+    .info-row:last-child{border-bottom:none}
+    .info-row .val{font-weight:700;color:#1e293b}
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+
+// ─── BS 7671:2018+A2:2022 DATA ─────────────────────────────────────────────
+
+const SIZES = [1, 1.5, 2.5, 4, 6, 10, 16, 25, 35, 50];
+
+// Current carrying capacity (A) — multi-core copper cables
+// [Method A, Method B, Method C, Method E/F]
+const CCC = {
+  'pvc': {
+    // Table 4D2A — 70°C thermoplastic, multi-core, copper
+    A: [11,   14,   18.5, 25,  32,  43,  57,  75,  92,  109],
+    B: [13,   16.5, 23,   30,  38,  52,  69,  90,  111, 133],
+    C: [15.5, 20,   27,   36,  46,  63,  85,  110, 134, 161],
+    E: [16,   21,   28,   38,  49,  67,  91,  119, 147, 178],
+  },
+  'xlpe': {
+    // Table 4E2A — 90°C thermosetting, multi-core, copper
+    A: [13.5, 17.5, 23,  31,  40,  54,  73,  95,  117, 140],
+    B: [16,   21,   28,  37,  47,  65,  87,  114, 141, 171],
+    C: [19.5, 25,   34,  45,  58,  80,  107, 138, 169, 207],
+    E: [20,   26,   35,  47,  61,  84,  114, 149, 185, 225],
+  },
+  'swa-pvc': {
+    // Table 4D4A — 70°C PVC insulated SWA, multi-core, copper (clipped/buried)
+    A: [11,   14,   18.5, 25,  32,  43,  57,  75,  92,  109],
+    B: [14,   18,   24,   32,  41,  56,  73,  96,  119, 143],
+    C: [17,   22,   30,   40,  51,  70,  94,  122, 150, 180],
+    E: [19,   24,   33,   44,  57,  77,  104, 136, 168, 202],
+  },
+  'swa-xlpe': {
+    // Table 4E4A — 90°C XLPE insulated SWA, multi-core, copper
+    A: [13.5, 17.5, 23,  31,  40,  54,  73,  95,  117, 140],
+    B: [17,   22,   30,  40,  51,  70,  94,  122, 152, 184],
+    C: [21,   28,   38,  51,  65,  89,  120, 156, 193, 232],
+    E: [23,   30,   41,  55,  70,  96,  130, 170, 209, 253],
+  },
+  'ev': {
+    // EV Ultra / H07RN-F flex — 90°C rubber, rated for outdoor/EV use
+    // Conservative CCC based on IEC 60245 / BS 7671 4E2A with slight derating
+    A: [13,   17,   22,  30,  38,  52,  70,  91,  112, 134],
+    B: [15,   20,   27,  35,  45,  62,  83,  109, 135, 163],
+    C: [18,   24,   32,  43,  55,  76,  102, 132, 161, 197],
+    E: [19,   25,   34,  46,  58,  80,  109, 142, 176, 214],
+  },
+};
+
+// Volt drop (mV/A/m) — single phase, both conductors included
+// Source: BS 7671 Tables 4D2B, 4E2B
+const VDROP = {
+  'pvc':     [44, 29, 18, 11, 7.3, 4.4, 2.8, 1.75, 1.25, 0.93],
+  'xlpe':    [44, 29, 18, 11, 7.3, 4.4, 2.8, 1.75, 1.25, 0.93],
+  'swa-pvc': [44, 29, 18, 11, 7.3, 4.4, 2.8, 1.75, 1.25, 0.93],
+  'swa-xlpe':[44, 29, 18, 11, 7.3, 4.4, 2.8, 1.75, 1.25, 0.93],
+  'ev':      [44, 29, 18, 11, 7.3, 4.4, 2.8, 1.75, 1.25, 0.93],
+};
+
+// Temperature correction factors (Table 4B1/4B2)
+const TEMP_FACTORS = {
+  'pvc':     {10:1.22, 15:1.17, 20:1.12, 25:1.06, 30:1.0, 35:0.94, 40:0.87, 45:0.79, 50:0.71},
+  'xlpe':    {10:1.15, 15:1.12, 20:1.08, 25:1.04, 30:1.0, 35:0.96, 40:0.91, 45:0.87, 50:0.82},
+  'swa-pvc': {10:1.22, 15:1.17, 20:1.12, 25:1.06, 30:1.0, 35:0.94, 40:0.87, 45:0.79, 50:0.71},
+  'swa-xlpe':{10:1.15, 15:1.12, 20:1.08, 25:1.04, 30:1.0, 35:0.96, 40:0.91, 45:0.87, 50:0.82},
+  'ev':      {10:1.15, 15:1.12, 20:1.08, 25:1.04, 30:1.0, 35:0.96, 40:0.91, 45:0.87, 50:0.82},
+};
+
+// Grouping factors (Table 4B1)
+const GROUP_FACTORS = [1.0, 0.8, 0.7, 0.65, 0.6, 0.57, 0.54, 0.52, 0.5, 0.48];
+
+// Protective device standard ratings
+const DEVICE_RATINGS = {
+  'mcb-b': [6,10,16,20,25,32,40,50,63,80,100],
+  'mcb-c': [6,10,16,20,25,32,40,50,63,80,100],
+  'mcb-d': [6,10,16,20,25,32,40,50,63,80,100],
+  'bs88':  [6,10,16,20,25,32,40,50,63,80,100,125,160,200],
+  'bs1361':[5,15,20,30,45,60,80,100],
+  'bs3036':[5,15,20,30,45,60,80,100],
+};
+
+// Earth conductor sizing — Table 54.7 / Reg 543.1.1
+function earthSize(liveMM2) {
+  if (liveMM2 <= 16) return liveMM2;
+  if (liveMM2 <= 35) return 16;
+  return liveMM2 / 2;
+}
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+
+const state = {
+  loadMode: 'amps',    // 'amps' | 'watts'
+  loadAmps: '',
+  loadWatts: '',
+  powerFactor: '1',
+  length: '',
+  method: 'B',
+  cableType: 'pvc',
+  deviceType: 'mcb-b',
+  deviceRating: '',
+  groups: '1',
+  ambientTemp: '30',
+  circuitType: 'power',  // 'power' | 'lighting'
+  result: null,
+};
+
+function s(field, val) {
+  state[field] = val;
+  calculate();
+  render();
+}
+
+// ─── CALCULATION ENGINE ────────────────────────────────────────────────────
+
+function calculate() {
+  state.result = null;
+
+  // Design current Ib
+  let Ib;
+  if (state.loadMode === 'amps') {
+    Ib = parseFloat(state.loadAmps);
+  } else {
+    const W = parseFloat(state.loadWatts);
+    const pf = parseFloat(state.powerFactor) || 1;
+    Ib = W / (230 * pf);
+  }
+
+  const L = parseFloat(state.length);
+  const In = parseFloat(state.deviceRating);
+  const groups = parseInt(state.groups) || 1;
+  const temp = parseInt(state.ambientTemp) || 30;
+
+  if (!Ib || Ib <= 0 || !L || L <= 0 || !In || In <= 0) return;
+  if (Ib > In) {
+    state.result = { error: `Design current (${Ib.toFixed(1)}A) exceeds device rating (${In}A). Increase device rating or reduce load.` };
+    return;
+  }
+
+  const cccTable = CCC[state.cableType];
+  const methodRatings = cccTable[state.method] || cccTable['B'];
+  const vdTable = VDROP[state.cableType];
+  const tempFactors = TEMP_FACTORS[state.cableType];
+
+  // Correction factors
+  const Ca = tempFactors[temp] || 1.0;
+  const Cg = GROUP_FACTORS[Math.min(groups - 1, 9)];
+  const Cf = state.deviceType === 'bs3036' ? 0.725 : 1.0;
+
+  // Find minimum cable size where Iz >= In and Iz >= Ib
+  // Iz = It × Ca × Cg × Cf
+  let selectedIdx = -1;
+  for (let i = 0; i < SIZES.length; i++) {
+    const It = methodRatings[i];
+    const Iz = It * Ca * Cg * Cf;
+    if (Iz >= In && Iz >= Ib) {
+      selectedIdx = i;
+      break;
+    }
+  }
+
+  if (selectedIdx === -1) {
+    state.result = { error: 'No standard cable size meets these requirements. Check your inputs or consider parallel cables.' };
+    return;
+  }
+
+  const size = SIZES[selectedIdx];
+  const It = methodRatings[selectedIdx];
+  const Iz = It * Ca * Cg * Cf;
+  const mvAm = vdTable[selectedIdx];
+
+  // Volt drop
+  const Vd = (mvAm * Ib * L) / 1000;
+  const VdPct = (Vd / 230) * 100;
+  const maxVdPct = state.circuitType === 'lighting' ? 3.0 : 5.0;
+  const vdPass = VdPct <= maxVdPct;
+
+  // If volt drop fails, find next size up that passes
+  let vdCableIdx = selectedIdx;
+  let vdOverride = false;
+  if (!vdPass) {
+    for (let i = selectedIdx + 1; i < SIZES.length; i++) {
+      const vd2 = (vdTable[i] * Ib * L) / 1000;
+      const vdPct2 = (vd2 / 230) * 100;
+      if (vdPct2 <= maxVdPct) {
+        vdCableIdx = i;
+        vdOverride = true;
+        break;
+      }
+    }
+  }
+
+  const finalIdx = vdOverride ? vdCableIdx : selectedIdx;
+  const finalSize = SIZES[finalIdx];
+  const finalIt = methodRatings[finalIdx];
+  const finalIz = finalIt * Ca * Cg * Cf;
+  const finalMvAm = vdTable[finalIdx];
+  const finalVd = (finalMvAm * Ib * L) / 1000;
+  const finalVdPct = (finalVd / 230) * 100;
+  const finalVdPass = finalVdPct <= maxVdPct;
+
+  const earth = earthSize(finalSize);
+
+  state.result = {
+    Ib: Ib.toFixed(2),
+    Ca: Ca.toFixed(2),
+    Cg: Cg.toFixed(2),
+    Cf: Cf,
+    In,
+    size: finalSize,
+    It: finalIt,
+    Iz: finalIz.toFixed(1),
+    Vd: finalVd.toFixed(2),
+    VdPct: finalVdPct.toFixed(1),
+    VdPass: finalVdPass,
+    maxVdPct,
+    earth,
+    protectionOk: finalIz >= In,
+    vdUpgraded: vdOverride,
+    originalSize: vdOverride ? SIZES[selectedIdx] : null,
+  };
+}
+
+// ─── RENDER ────────────────────────────────────────────────────────────────
+
+function render() {
+  document.getElementById('app').innerHTML = buildUI();
+  // Restore input values manually (avoid cursor jumping)
+  ['loadAmps','loadWatts','powerFactor','length'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el !== document.activeElement) el.value = state[id];
+  });
+}
+
+function buildUI() {
+  const r = state.result;
+  const deviceRatings = DEVICE_RATINGS[state.deviceType] || [];
+
+  return `
+  <div class="header">
+    <h1>⚡ E-Fix Cable Calculator</h1>
+    <p>BS 7671:2018+A2:2022 · Single Phase 230V</p>
+  </div>
+
+  <!-- Load -->
+  <div class="card">
+    <div class="card-title">Load</div>
+    <div class="toggle-row">
+      <div class="toggle-btn ${state.loadMode==='amps'?'active':''}" onclick="s('loadMode','amps')">Amps (A)</div>
+      <div class="toggle-btn ${state.loadMode==='watts'?'active':''}" onclick="s('loadMode','watts')">Watts (W)</div>
+    </div>
+    ${state.loadMode === 'amps' ? `
+      <div class="field">
+        <label>Design Current (Ib)</label>
+        <input id="loadAmps" inputmode="decimal" placeholder="e.g. 16" oninput="s('loadAmps',this.value)">
+      </div>
+    ` : `
+      <div class="row">
+        <div><label>Load (W)</label><input id="loadWatts" inputmode="decimal" placeholder="e.g. 3000" oninput="s('loadWatts',this.value)"></div>
+        <div><label>Power Factor</label><input id="powerFactor" inputmode="decimal" placeholder="1.0" oninput="s('powerFactor',this.value)"></div>
+      </div>
+    `}
+    <div class="field">
+      <label>One-Way Circuit Length (m)</label>
+      <input id="length" inputmode="decimal" placeholder="e.g. 25" oninput="s('length',this.value)">
+    </div>
+    <div class="field">
+      <label>Circuit Type</label>
+      <div class="toggle-row" style="margin-bottom:0">
+        <div class="toggle-btn ${state.circuitType==='power'?'active':''}" onclick="s('circuitType','power')">Power (5%)</div>
+        <div class="toggle-btn ${state.circuitType==='lighting'?'active':''}" onclick="s('circuitType','lighting')">Lighting (3%)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cable & Install -->
+  <div class="card">
+    <div class="card-title">Cable &amp; Installation</div>
+    <div class="field">
+      <label>Cable Type</label>
+      <select onchange="s('cableType',this.value)">
+        <option value="pvc" ${state.cableType==='pvc'?'selected':''}>70°C PVC (Twin &amp; Earth / Multicore)</option>
+        <option value="xlpe" ${state.cableType==='xlpe'?'selected':''}>90°C XLPE (LSF / Multicore)</option>
+        <option value="swa-pvc" ${state.cableType==='swa-pvc'?'selected':''}>SWA — PVC insulated</option>
+        <option value="swa-xlpe" ${state.cableType==='swa-xlpe'?'selected':''}>SWA — XLPE insulated</option>
+        <option value="ev" ${state.cableType==='ev'?'selected':''}>EV Ultra / H07RN-F Flex</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Installation Method (BS 7671 Table 4A2)</label>
+      <select onchange="s('method',this.value)">
+        <option value="A" ${state.method==='A'?'selected':''}>Method A — Conduit in insulated wall</option>
+        <option value="B" ${state.method==='B'?'selected':''}>Method B — Conduit on wall / trunking</option>
+        <option value="C" ${state.method==='C'?'selected':''}>Method C — Clipped direct</option>
+        <option value="E" ${state.method==='E'?'selected':''}>Method E — Free air / cable tray</option>
+      </select>
+    </div>
+    <div class="row">
+      <div>
+        <label>Circuits Grouped</label>
+        <select onchange="s('groups',this.value)">
+          ${[1,2,3,4,5,6,7,8,9,10].map(n=>`<option value="${n}" ${state.groups==n?'selected':''}>${n}${n===10?' (10+)':''}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <label>Ambient Temp (°C)</label>
+        <select onchange="s('ambientTemp',this.value)">
+          ${[10,15,20,25,30,35,40,45,50].map(t=>`<option value="${t}" ${state.ambientTemp==t?'selected':''}>${t}°C${t===30?' (std)':''}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Protective Device -->
+  <div class="card">
+    <div class="card-title">Protective Device</div>
+    <div class="row">
+      <div>
+        <label>Type</label>
+        <select onchange="s('deviceType',this.value)">
+          <option value="mcb-b" ${state.deviceType==='mcb-b'?'selected':''}>MCB Type B</option>
+          <option value="mcb-c" ${state.deviceType==='mcb-c'?'selected':''}>MCB Type C</option>
+          <option value="mcb-d" ${state.deviceType==='mcb-d'?'selected':''}>MCB Type D</option>
+          <option value="bs88" ${state.deviceType==='bs88'?'selected':''}>Fuse BS 88</option>
+          <option value="bs1361" ${state.deviceType==='bs1361'?'selected':''}>Fuse BS 1361</option>
+          <option value="bs3036" ${state.deviceType==='bs3036'?'selected':''}>Fuse BS 3036</option>
+        </select>
+      </div>
+      <div>
+        <label>Rating (A)</label>
+        <select onchange="s('deviceRating',this.value)">
+          <option value="">Select</option>
+          ${deviceRatings.map(r=>`<option value="${r}" ${state.deviceRating==r?'selected':''}>${r}A</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    ${state.deviceType==='bs3036'?`<div class="warning-box">⚠️ BS 3036 fuse — 0.725 correction factor applied (Reg 433.1.1)</div>`:''}
+  </div>
+
+  <!-- Results -->
+  ${r ? (r.error ? `
+    <div class="result-card fail">
+      <div class="result-label">⚠ Cannot Calculate</div>
+      <div style="font-size:13px;color:#dc2626;margin-top:4px">${r.error}</div>
+    </div>
+  ` : `
+    ${r.vdUpgraded ? `<div class="warning-box">⬆ Cable upsized from ${r.originalSize}mm² to ${r.size}mm² to meet volt drop limit</div>` : ''}
+
+    <div class="card" style="background:#1e293b;border-radius:14px">
+      <div class="card-title" style="color:#94a3b8">Minimum Cable Size</div>
+      <div style="display:flex;align-items:baseline;gap:6px">
+        <div class="cable-size-big" style="color:#f1f5f9">${r.size}</div>
+        <div class="cable-size-unit" style="color:#94a3b8">mm²</div>
+      </div>
+      <div style="font-size:12px;color:#64748b;margin-top:6px">Earth conductor: ${r.earth}mm²</div>
+    </div>
+
+    <div class="result-grid">
+      <div class="result-card ${r.protectionOk?'pass':'fail'}">
+        <div class="result-label">CCC (Iz)</div>
+        <div class="result-value">${r.Iz}</div>
+        <div class="result-unit">Amps</div>
+        <div class="result-note">${r.protectionOk?'✓ ≥ '+r.In+'A device':'✗ Fails protection'}</div>
+      </div>
+      <div class="result-card ${r.VdPass?'pass':'fail'}">
+        <div class="result-label">Volt Drop</div>
+        <div class="result-value">${r.VdPct}%</div>
+        <div class="result-unit">${r.Vd}V</div>
+        <div class="result-note">${r.VdPass?'✓ Within '+r.maxVdPct+'% limit':'✗ Exceeds '+r.maxVdPct+'% limit'}</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Calculation Summary</div>
+      <div class="info-row"><span>Design current (Ib)</span><span class="val">${r.Ib}A</span></div>
+      <div class="info-row"><span>Device rating (In)</span><span class="val">${r.In}A</span></div>
+      <div class="info-row"><span>Cable tabulated CCC (It)</span><span class="val">${r.It}A</span></div>
+      <div class="info-row"><span>Temp. correction (Ca)</span><span class="val">${r.Ca}</span></div>
+      <div class="info-row"><span>Grouping factor (Cg)</span><span class="val">${r.Cg}</span></div>
+      ${r.Cf < 1 ? `<div class="info-row"><span>BS 3036 factor (Cf)</span><span class="val">${r.Cf}</span></div>` : ''}
+      <div class="info-row"><span>Corrected CCC (Iz)</span><span class="val">${r.Iz}A</span></div>
+      <div class="info-row"><span>Volt drop</span><span class="val">${r.Vd}V (${r.VdPct}%)</span></div>
+      <div class="info-row"><span>Earth conductor</span><span class="val">${r.earth}mm²</span></div>
+    </div>
+  `) : `
+    <div class="card">
+      <div class="empty-result">Enter load, length and device rating<br>to calculate cable size</div>
+    </div>
+  `}
+  `;
+}
+
+// ─── INIT ──────────────────────────────────────────────────────────────────
+
+render();
+</script>
+</body>
+</html>
