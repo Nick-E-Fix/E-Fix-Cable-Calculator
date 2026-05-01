@@ -39,15 +39,14 @@
     .cable-size-big{font-size:48px;font-weight:900;color:#1e293b;line-height:1}
     .cable-size-unit{font-size:18px;font-weight:700;color:#64748b}
     .empty-result{text-align:center;padding:30px 20px;color:#94a3b8;font-size:14px}
-    /* Cable visual strip */
+    /* Cable visual */
     .cable-visual{display:flex;align-items:center;gap:12px;background:#f8fafc;border-radius:10px;padding:10px 12px;margin-bottom:12px;border:1.5px solid #e2e8f0}
+    .cable-visual img{width:72px;height:72px;object-fit:cover;border-radius:8px;flex-shrink:0;background:#e2e8f0}
     .cable-visual svg{flex-shrink:0}
-    .cable-visual-info{flex:1}
+    .cable-visual-info{flex:1;min-width:0}
     .cable-visual-name{font-size:13px;font-weight:700;color:#1e293b}
     .cable-visual-desc{font-size:11px;color:#64748b;margin-top:2px;line-height:1.4}
-    /* Clipping diagram */
-    .clip-diagram{background:#f8fafc;border-radius:12px;padding:14px;border:1.5px solid #e2e8f0;margin-top:4px}
-    .clip-diagram-title{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px}
+    /* Clipping */
     .clip-dims{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
     .clip-dim{text-align:center;background:#fff;border-radius:8px;padding:10px 6px;border:1px solid #e2e8f0}
     .clip-dim-label{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px}
@@ -65,12 +64,15 @@
 const SIZES = [1, 1.5, 2.5, 4, 6, 10, 16, 25, 35, 50];
 
 const CCC = {
-  'pvc':     { A:[11,14,18.5,25,32,43,57,75,92,109], B:[13,16.5,23,30,38,52,69,90,111,133], C:[15.5,20,27,36,46,63,85,110,134,161], E:[16,21,28,38,49,67,91,119,147,178] },
-  'xlpe':    { A:[13.5,17.5,23,31,40,54,73,95,117,140], B:[16,21,28,37,47,65,87,114,141,171], C:[19.5,25,34,45,58,80,107,138,169,207], E:[20,26,35,47,61,84,114,149,185,225] },
-  'swa-pvc': { A:[11,14,18.5,25,32,43,57,75,92,109], B:[14,18,24,32,41,56,73,96,119,143], C:[17,22,30,40,51,70,94,122,150,180], E:[19,24,33,44,57,77,104,136,168,202] },
-  'swa-xlpe':{ A:[13.5,17.5,23,31,40,54,73,95,117,140], B:[17,22,30,40,51,70,94,122,152,184], C:[21,28,38,51,65,89,120,156,193,232], E:[23,30,41,55,70,96,130,170,209,253] },
-  'ev':      { A:[13,17,22,30,38,52,70,91,112,134], B:[15,20,27,35,45,62,83,109,135,163], C:[18,24,32,43,55,76,102,132,161,197], E:[19,25,34,46,58,80,109,142,176,214] },
-  'ev-swa':  { A:[13.5,17.5,23,31,40,54,73,95,117,140], B:[17,22,30,40,51,70,94,122,152,184], C:[21,28,38,51,65,89,120,156,193,232], E:[23,30,41,55,70,96,130,170,209,253] },
+  'pvc':     { A:[11,14,18.5,25,32,43,57,75,92,109],     B:[13,16.5,23,30,38,52,69,90,111,133],  C:[15.5,20,27,36,46,63,85,110,134,161], E:[16,21,28,38,49,67,91,119,147,178] },
+  'xlpe':    { A:[13.5,17.5,23,31,40,54,73,95,117,140],  B:[16,21,28,37,47,65,87,114,141,171],   C:[19.5,25,34,45,58,80,107,138,169,207],E:[20,26,35,47,61,84,114,149,185,225] },
+  'swa-pvc': { A:[11,14,18.5,25,32,43,57,75,92,109],     B:[14,18,24,32,41,56,73,96,119,143],    C:[17,22,30,40,51,70,94,122,150,180],   E:[19,24,33,44,57,77,104,136,168,202] },
+  'swa-xlpe':{ A:[13.5,17.5,23,31,40,54,73,95,117,140],  B:[17,22,30,40,51,70,94,122,152,184],   C:[21,28,38,51,65,89,120,156,193,232],  E:[23,30,41,55,70,96,130,170,209,253] },
+  'h07rnf':  { A:[13,17,22,30,38,52,70,91,112,134],      B:[15,20,27,35,45,62,83,109,135,163],   C:[18,24,32,43,55,76,102,132,161,197],  E:[19,25,34,46,58,80,109,142,176,214] },
+  'ev':      { A:[13,17,22,30,38,52,70,91,112,134],      B:[15,20,27,35,45,62,83,109,135,163],   C:[18,24,32,43,55,76,102,132,161,197],  E:[19,25,34,46,58,80,109,142,176,214] },
+  'ev-swa':  { A:[13.5,17.5,23,31,40,54,73,95,117,140],  B:[17,22,30,40,51,70,94,122,152,184],   C:[21,28,38,51,65,89,120,156,193,232],  E:[23,30,41,55,70,96,130,170,209,253] },
+  'nyy':     { A:[11,14,18.5,25,32,43,57,75,92,109],     B:[13,16.5,23,30,38,52,69,90,111,133],  C:[15.5,20,27,36,46,63,85,110,134,161], E:[16,21,28,38,49,67,91,119,147,178] },
+  'syy':     { A:[10,12,16,22,28,37,50,65,80,95],        B:[11,14,20,26,33,45,60,78,97,116],     C:[13,17,23,31,40,55,74,96,117,140],    E:[14,18,24,33,43,58,79,104,128,155] },
 };
 
 const VDROP = {
@@ -78,8 +80,11 @@ const VDROP = {
   'xlpe':    [44,29,18,11,7.3,4.4,2.8,1.75,1.25,0.93],
   'swa-pvc': [44,29,18,11,7.3,4.4,2.8,1.75,1.25,0.93],
   'swa-xlpe':[44,29,18,11,7.3,4.4,2.8,1.75,1.25,0.93],
+  'h07rnf':  [44,29,18,11,7.3,4.4,2.8,1.75,1.25,0.93],
   'ev':      [44,29,18,11,7.3,4.4,2.8,1.75,1.25,0.93],
   'ev-swa':  [44,29,18,11,7.3,4.4,2.8,1.75,1.25,0.93],
+  'nyy':     [44,29,18,11,7.3,4.4,2.8,1.75,1.25,0.93],
+  'syy':     [44,29,18,11,7.3,4.4,2.8,1.75,1.25,0.93],
 };
 
 const TEMP_FACTORS = {
@@ -87,8 +92,11 @@ const TEMP_FACTORS = {
   'xlpe':    {10:1.15,15:1.12,20:1.08,25:1.04,30:1.0,35:0.96,40:0.91,45:0.87,50:0.82},
   'swa-pvc': {10:1.22,15:1.17,20:1.12,25:1.06,30:1.0,35:0.94,40:0.87,45:0.79,50:0.71},
   'swa-xlpe':{10:1.15,15:1.12,20:1.08,25:1.04,30:1.0,35:0.96,40:0.91,45:0.87,50:0.82},
+  'h07rnf':  {10:1.15,15:1.12,20:1.08,25:1.04,30:1.0,35:0.96,40:0.91,45:0.87,50:0.82},
   'ev':      {10:1.15,15:1.12,20:1.08,25:1.04,30:1.0,35:0.96,40:0.91,45:0.87,50:0.82},
   'ev-swa':  {10:1.15,15:1.12,20:1.08,25:1.04,30:1.0,35:0.96,40:0.91,45:0.87,50:0.82},
+  'nyy':     {10:1.22,15:1.17,20:1.12,25:1.06,30:1.0,35:0.94,40:0.87,45:0.79,50:0.71},
+  'syy':     {10:1.22,15:1.17,20:1.12,25:1.06,30:1.0,35:0.94,40:0.87,45:0.79,50:0.71},
 };
 
 const GROUP_FACTORS = [1.0,0.8,0.7,0.65,0.6,0.57,0.54,0.52,0.5,0.48];
@@ -102,7 +110,7 @@ const DEVICE_RATINGS = {
   'bs3036':[5,15,20,30,45,60,80,100],
 };
 
-// Twin & Earth CPC sizes (BS EN 6004 cable construction)
+// T&E fixed CPC sizes (BS EN 6004)
 const TE_CPC = {1:1, 1.5:1, 2.5:1.5, 4:2.5, 6:2.5, 10:4, 16:6, 25:16, 35:16, 50:25};
 
 function cpcSize(liveMM2, cableType) {
@@ -112,22 +120,22 @@ function cpcSize(liveMM2, cableType) {
   return liveMM2 / 2;
 }
 
-// ─── CABLE OD & CLIPPING DISTANCES ────────────────────────────────────────
-// Approximate overall diameters (mm) — used to determine BS 7671 Table 4A1 clipping distances
+// ─── CABLE OD & CLIPPING DISTANCES — BS 7671 Table 4A1 ────────────────────
 const CABLE_OD = {
   'pvc':     {1:6.7,  1.5:7.5,  2.5:8.4,  4:9.5,  6:10.9, 10:13.0, 16:15.7, 25:18.0, 35:20.5, 50:23.5},
   'xlpe':    {1:7.5,  1.5:8.2,  2.5:9.3,  4:10.5, 6:12.0, 10:14.5, 16:17.5, 25:21.0, 35:24.0, 50:27.0},
   'swa-pvc': {1:12.0, 1.5:12.5, 2.5:13.5, 4:14.5, 6:16.0, 10:18.5, 16:21.5, 25:25.0, 35:28.0, 50:31.5},
   'swa-xlpe':{1:12.0, 1.5:12.5, 2.5:13.5, 4:14.5, 6:16.5, 10:19.0, 16:22.0, 25:26.0, 35:29.0, 50:32.5},
-  'ev':      {1:7.0,  1.5:7.8,  2.5:9.0,  4:10.2, 6:11.8, 10:14.2, 16:17.0, 25:20.5, 35:23.5, 50:26.5},
+  'h07rnf':  {1:7.0,  1.5:7.8,  2.5:9.0,  4:10.2, 6:11.8, 10:14.2, 16:17.0, 25:20.5, 35:23.5, 50:26.5},
+  'ev':      {1:8.0,  1.5:9.0,  2.5:10.5, 4:12.0, 6:14.0, 10:17.0, 16:20.0, 25:24.0, 35:27.0, 50:30.0},
   'ev-swa':  {1:12.0, 1.5:12.5, 2.5:13.5, 4:14.5, 6:16.0, 10:18.5, 16:21.5, 25:25.0, 35:28.0, 50:31.5},
+  'nyy':     {1:8.0,  1.5:8.8,  2.5:10.0, 4:11.2, 6:12.8, 10:15.5, 16:18.8, 25:22.5, 35:25.5, 50:28.8},
+  'syy':     {1:7.5,  1.5:8.2,  2.5:9.3,  4:10.5, 6:12.0, 10:14.5, 16:17.5, 25:21.0, 35:24.0, 50:27.0},
 };
 
-// Returns {H, V} clipping distances in mm per BS 7671 Table 4A1
 function clippingDist(cableType, sizeMM2) {
   const armoured = cableType.startsWith('swa') || cableType === 'ev-swa';
-  const odMap = CABLE_OD[cableType] || {};
-  const od = odMap[sizeMM2] || 10;
+  const od = (CABLE_OD[cableType] || {})[sizeMM2] || 10;
   if (armoured) {
     if (od <= 9)  return {H:350, V:450};
     if (od <= 15) return {H:400, V:550};
@@ -139,256 +147,163 @@ function clippingDist(cableType, sizeMM2) {
   }
 }
 
-// ─── CABLE VISUAL DATA ─────────────────────────────────────────────────────
+// ─── CABLE METADATA ────────────────────────────────────────────────────────
 const CABLE_META = {
-  'pvc':     { name:'Twin & Earth — 70°C PVC', desc:'Flat grey sheath · L, N conductors + bare CPC · BS EN 6004', colour:'#94a3b8' },
-  'xlpe':    { name:'Multicore — 90°C XLPE/LSF', desc:'Round grey sheath · L, N, E conductors · heat-resistant', colour:'#64748b' },
-  'swa-pvc': { name:'SWA — 70°C PVC', desc:'Round · steel wire armour · mechanical protection · PVC sheath', colour:'#78716c' },
-  'swa-xlpe':{ name:'SWA — 90°C XLPE', desc:'Round · steel wire armour · mechanical protection · XLPE insulation', colour:'#57534e' },
-  'ev':      { name:'EV Ultra / H07RN-F', desc:'Round black rubber · flexible · UV-resistant · outdoor rated', colour:'#1e293b' },
-  'ev-swa':  { name:'EV Ultra SWA', desc:'Armoured rubber flex · EV charging · Doncaster Cables', colour:'#0f172a' },
+  'pvc':     { name:'Twin & Earth — 70°C PVC',         desc:'Flat grey sheath · Brown L, Blue N, Bare CPC · BS EN 6004',           img:'images/cable_te_pvc.png' },
+  'xlpe':    { name:'Multicore — 90°C XLPE / LSF',     desc:'Round grey sheath · Brown, Blue, Green/Yellow cores · heat-resistant', img:'images/cable_pvc_multicore.png' },
+  'swa-pvc': { name:'SWA — 70°C PVC insulated',        desc:'Round · steel wire armour · PVC outer sheath · mechanical protection', img:null },
+  'swa-xlpe':{ name:'SWA — 90°C XLPE insulated',       desc:'Round · steel wire armour · XLPE insulation · high-temp rated',       img:null },
+  'h07rnf':  { name:'H07RN-F — 90°C Rubber Flex',      desc:'Black rubber sheath · stranded copper · portable / temporary use · IEC 60245', img:'images/cable_h07rnf.webp' },
+  'ev':      { name:'EV Ultra Tuff Sheath',             desc:'Black rubber · Doncaster Cables · UV resistant · EV charging · verify Iz with datasheet', img:'images/cable_ev_ultra.png' },
+  'ev-swa':  { name:'EV Ultra SWA',                    desc:'Armoured rubber · Doncaster Cables · EV charging · verify Iz with datasheet',          img:'images/cable_ev_swa.png' },
+  'nyy':     { name:'NYY — PVC/PVC Power Cable',       desc:'Black PVC outer · suitable for direct burial · 3-core power cable',   img:'images/cable_nyy.png' },
+  'syy':     { name:'S-YY — Screened Control Cable',   desc:'Braided screen · control/instrumentation · verify CCC with manufacturer', img:'images/cable_syy.png' },
 };
 
-// SVG cross-section for each cable type (48×48 viewBox)
-function cableSVG(type) {
-  const s = (inner) => `<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
-  if (type === 'pvc') {
-    // Flat T&E: oval outer sheath, two round cores (L brown, N blue), bare CPC below
-    return s(`
-      <ellipse cx="32" cy="34" rx="26" ry="18" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.5"/>
-      <circle cx="22" cy="34" r="9" fill="#d97706" stroke="#92400e" stroke-width="1"/>
-      <circle cx="22" cy="34" r="6" fill="#fbbf24"/>
-      <circle cx="42" cy="34" r="9" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1"/>
-      <circle cx="42" cy="34" r="6" fill="#93c5fd"/>
-      <circle cx="32" cy="50" r="4" fill="#16a34a" stroke="#15803d" stroke-width="1"/>
-      <text x="32" y="13" text-anchor="middle" font-size="9" font-weight="700" fill="#475569">T&amp;E</text>
-    `);
+// SVG fallback for SWA types (no photo available)
+function swaSVG(type) {
+  const col = type === 'swa-xlpe' ? '#57534e' : '#78716c';
+  return `<svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" style="border-radius:8px;background:#e2e8f0">
+    <circle cx="36" cy="38" r="26" fill="${col}"/>
+    <circle cx="36" cy="38" r="22" fill="#a8a29e"/>
+    ${[0,1,2,3,4,5,6,7,8,9,10,11].map(i=>{const a=i*30*Math.PI/180,r=22,x=(36+r*Math.sin(a)).toFixed(1),y=(38-r*Math.cos(a)).toFixed(1);return`<circle cx="${x}" cy="${y}" r="2.5" fill="#d6d3d1"/>`;}).join('')}
+    <circle cx="36" cy="38" r="17" fill="#e2e8f0"/>
+    <circle cx="36" cy="26" r="7" fill="#d97706" stroke="#92400e" stroke-width="1"/><circle cx="36" cy="26" r="5" fill="#fbbf24"/>
+    <circle cx="24" cy="44" r="7" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1"/><circle cx="24" cy="44" r="5" fill="#93c5fd"/>
+    <circle cx="48" cy="44" r="7" fill="#22c55e" stroke="#15803d" stroke-width="1"/><circle cx="48" cy="44" r="5" fill="#86efac"/>
+    <text x="36" y="12" text-anchor="middle" font-size="8" font-weight="700" fill="#f5f5f4">${type==='swa-xlpe'?'SWA XLPE':'SWA PVC'}</text>
+  </svg>`;
+}
+
+function cableVisual(type) {
+  const meta = CABLE_META[type] || {};
+  if (meta.img) {
+    return `<img src="${meta.img}" alt="${meta.name}" onerror="this.style.display='none'">`;
   }
-  if (type === 'xlpe') {
-    // Round 3-core: grey sheath, L/N/E in trefoil
-    return s(`
-      <circle cx="32" cy="36" r="22" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.5"/>
-      <circle cx="32" cy="36" r="18" fill="#e2e8f0"/>
-      <circle cx="32" cy="22" r="7" fill="#d97706" stroke="#92400e" stroke-width="1"/>
-      <circle cx="32" cy="22" r="5" fill="#fbbf24"/>
-      <circle cx="20" cy="43" r="7" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1"/>
-      <circle cx="20" cy="43" r="5" fill="#93c5fd"/>
-      <circle cx="44" cy="43" r="7" fill="#22c55e" stroke="#15803d" stroke-width="1"/>
-      <circle cx="44" cy="43" r="5" fill="#86efac"/>
-      <text x="32" y="11" text-anchor="middle" font-size="8" font-weight="700" fill="#475569">XLPE</text>
-    `);
-  }
-  if (type === 'swa-pvc' || type === 'swa-xlpe') {
-    const label = type === 'swa-pvc' ? 'SWA PVC' : 'SWA XLPE';
-    // Round with armour ring and 3 cores
-    return s(`
-      <circle cx="32" cy="36" r="23" fill="#78716c" stroke="#57534e" stroke-width="1.5"/>
-      <circle cx="32" cy="36" r="20" fill="#a8a29e" stroke="#78716c" stroke-width="0.5"/>
-      ${[0,1,2,3,4,5,6,7,8,9,10,11].map(i=>{
-        const a=i*30*(Math.PI/180), r=20;
-        const x=32+r*Math.sin(a), y=36-r*Math.cos(a);
-        return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="#d6d3d1"/>`;
-      }).join('')}
-      <circle cx="32" cy="36" r="15" fill="#e2e8f0"/>
-      <circle cx="32" cy="24" r="6" fill="#d97706" stroke="#92400e" stroke-width="1"/>
-      <circle cx="32" cy="24" r="4" fill="#fbbf24"/>
-      <circle cx="21" cy="42" r="6" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1"/>
-      <circle cx="21" cy="42" r="4" fill="#93c5fd"/>
-      <circle cx="43" cy="42" r="6" fill="#22c55e" stroke="#15803d" stroke-width="1"/>
-      <circle cx="43" cy="42" r="4" fill="#86efac"/>
-      <text x="32" y="10" text-anchor="middle" font-size="7" font-weight="700" fill="#f5f5f4">${label}</text>
-    `);
-  }
-  if (type === 'ev') {
-    // Black round rubber flex
-    return s(`
-      <circle cx="32" cy="36" r="22" fill="#1e293b" stroke="#0f172a" stroke-width="1.5"/>
-      <circle cx="32" cy="36" r="18" fill="#334155"/>
-      <circle cx="32" cy="22" r="7" fill="#d97706" stroke="#92400e" stroke-width="1"/>
-      <circle cx="32" cy="22" r="5" fill="#fbbf24"/>
-      <circle cx="20" cy="43" r="7" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1"/>
-      <circle cx="20" cy="43" r="5" fill="#93c5fd"/>
-      <circle cx="44" cy="43" r="7" fill="#22c55e" stroke="#15803d" stroke-width="1"/>
-      <circle cx="44" cy="43" r="5" fill="#86efac"/>
-      <text x="32" y="11" text-anchor="middle" font-size="7" font-weight="700" fill="#94a3b8">EV FLEX</text>
-    `);
-  }
-  if (type === 'ev-swa') {
-    // Black armoured rubber flex
-    return s(`
-      <circle cx="32" cy="36" r="23" fill="#0f172a" stroke="#020617" stroke-width="1.5"/>
-      <circle cx="32" cy="36" r="20" fill="#334155" stroke="#1e293b" stroke-width="0.5"/>
-      ${[0,1,2,3,4,5,6,7,8,9,10,11].map(i=>{
-        const a=i*30*(Math.PI/180), r=20;
-        const x=32+r*Math.sin(a), y=36-r*Math.cos(a);
-        return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="#64748b"/>`;
-      }).join('')}
-      <circle cx="32" cy="36" r="15" fill="#1e293b"/>
-      <circle cx="32" cy="24" r="6" fill="#d97706" stroke="#92400e" stroke-width="1"/>
-      <circle cx="32" cy="24" r="4" fill="#fbbf24"/>
-      <circle cx="21" cy="42" r="6" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1"/>
-      <circle cx="21" cy="42" r="4" fill="#93c5fd"/>
-      <circle cx="43" cy="42" r="6" fill="#22c55e" stroke="#15803d" stroke-width="1"/>
-      <circle cx="43" cy="42" r="4" fill="#86efac"/>
-      <text x="32" y="10" text-anchor="middle" font-size="7" font-weight="700" fill="#94a3b8">EV SWA</text>
-    `);
-  }
-  return s('');
+  return swaSVG(type);
 }
 
 // ─── CLIPPING DIAGRAM SVG ─────────────────────────────────────────────────
 function clippingDiagramSVG(H, V, cableType) {
-  const armoured = cableType.startsWith('swa') || cableType === 'ev-swa';
-  const cableCol = (cableType === 'ev' || cableType === 'ev-swa') ? '#334155' : armoured ? '#78716c' : '#cbd5e1';
-  const cableStroke = armoured ? '#57534e' : '#94a3b8';
+  const arm = cableType.startsWith('swa') || cableType === 'ev-swa';
+  const col = (cableType==='ev'||cableType==='ev-swa'||cableType==='h07rnf') ? '#334155' : arm ? '#78716c' : '#cbd5e1';
+  const stroke = arm ? '#57534e' : '#94a3b8';
+  return `<svg width="100%" viewBox="0 0 320 155" xmlns="http://www.w3.org/2000/svg" style="display:block">
+    <text x="75" y="13" text-anchor="middle" font-size="9" fill="#64748b" font-weight="700">HORIZONTAL</text>
+    <rect x="10" y="16" width="130" height="8" rx="2" fill="#94a3b8"/>
+    <rect x="28" y="24" width="4" height="12" rx="1" fill="#475569"/>
+    <rect x="88" y="24" width="4" height="12" rx="1" fill="#475569"/>
+    <rect x="118" y="24" width="4" height="12" rx="1" fill="#475569"/>
+    <line x1="16" y1="42" x2="134" y2="42" stroke="${col}" stroke-width="10" stroke-linecap="round"/>
+    <line x1="16" y1="42" x2="134" y2="42" stroke="${stroke}" stroke-width="12" stroke-linecap="round" opacity="0.25"/>
+    <rect x="27" y="37" width="6" height="11" rx="1.5" fill="#374151" opacity="0.9"/>
+    <rect x="87" y="37" width="6" height="11" rx="1.5" fill="#374151" opacity="0.9"/>
+    <rect x="117" y="37" width="6" height="11" rx="1.5" fill="#374151" opacity="0.9"/>
+    <line x1="30" y1="60" x2="90" y2="60" stroke="#2563eb" stroke-width="1.5"/>
+    <polygon points="30,57 30,63 22,60" fill="#2563eb"/>
+    <polygon points="90,57 90,63 98,60" fill="#2563eb"/>
+    <text x="60" y="74" text-anchor="middle" font-size="12" font-weight="800" fill="#2563eb">${H}mm</text>
+    <text x="60" y="86" text-anchor="middle" font-size="9" fill="#64748b">max horizontal</text>
 
-  return `<svg width="100%" viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg" style="display:block">
-    <!-- HORIZONTAL RUN (left half) -->
-    <!-- Surface -->
-    <rect x="10" y="18" width="130" height="8" rx="2" fill="#94a3b8"/>
-    <text x="75" y="14" text-anchor="middle" font-size="9" fill="#64748b" font-weight="600">HORIZONTAL</text>
-    <!-- Clips -->
-    <rect x="28" y="26" width="4" height="12" rx="1" fill="#475569"/>
-    <rect x="88" y="26" width="4" height="12" rx="1" fill="#475569"/>
-    <rect x="118" y="26" width="4" height="12" rx="1" fill="#475569"/>
-    <!-- Cable line -->
-    <line x1="16" y1="44" x2="134" y2="44" stroke="${cableCol}" stroke-width="10" stroke-linecap="round"/>
-    <line x1="16" y1="44" x2="134" y2="44" stroke="${cableStroke}" stroke-width="12" stroke-linecap="round" opacity="0.3"/>
-    <!-- Clip saddles on cable -->
-    <rect x="27" y="38" width="6" height="12" rx="1.5" fill="#374151" opacity="0.9"/>
-    <rect x="87" y="38" width="6" height="12" rx="1.5" fill="#374151" opacity="0.9"/>
-    <rect x="117" y="38" width="6" height="12" rx="1.5" fill="#374151" opacity="0.9"/>
-    <!-- Dimension arrow -->
-    <line x1="30" y1="62" x2="90" y2="62" stroke="#2563eb" stroke-width="1.5"/>
-    <polygon points="30,59 30,65 22,62" fill="#2563eb"/>
-    <polygon points="90,59 90,65 98,62" fill="#2563eb"/>
-    <text x="60" y="76" text-anchor="middle" font-size="11" font-weight="800" fill="#2563eb">${H}mm</text>
-    <text x="60" y="88" text-anchor="middle" font-size="9" fill="#64748b">max horizontal</text>
-
-    <!-- VERTICAL RUN (right half) -->
-    <text x="245" y="14" text-anchor="middle" font-size="9" fill="#64748b" font-weight="600">VERTICAL</text>
-    <!-- Surface -->
-    <rect x="178" y="18" width="8" height="130" rx="2" fill="#94a3b8"/>
-    <!-- Cable line -->
-    <line x1="196" y1="20" x2="196" y2="148" stroke="${cableCol}" stroke-width="10" stroke-linecap="round"/>
-    <line x1="196" y1="20" x2="196" y2="148" stroke="${cableStroke}" stroke-width="12" stroke-linecap="round" opacity="0.3"/>
-    <!-- Clips -->
-    <rect x="186" y="28" width="12" height="4" rx="1" fill="#475569"/>
-    <rect x="186" y="83" width="12" height="4" rx="1" fill="#475569"/>
-    <rect x="186" y="138" width="12" height="4" rx="1" fill="#475569"/>
-    <!-- Clip saddles -->
-    <rect x="190" y="26" width="12" height="8" rx="1.5" fill="#374151" opacity="0.9"/>
-    <rect x="190" y="81" width="12" height="8" rx="1.5" fill="#374151" opacity="0.9"/>
-    <rect x="190" y="136" width="12" height="8" rx="1.5" fill="#374151" opacity="0.9"/>
-    <!-- Dimension arrow -->
-    <line x1="218" y1="30" x2="218" y2="85" stroke="#2563eb" stroke-width="1.5"/>
-    <polygon points="215,30 221,30 218,22" fill="#2563eb"/>
-    <polygon points="215,85 221,85 218,93" fill="#2563eb"/>
-    <text x="260" y="56" text-anchor="middle" font-size="11" font-weight="800" fill="#2563eb">${V}mm</text>
-    <text x="260" y="68" text-anchor="middle" font-size="9" fill="#64748b">max vertical</text>
-    <text x="260" y="80" text-anchor="middle" font-size="8" fill="#94a3b8">Table 4A1</text>
+    <text x="245" y="13" text-anchor="middle" font-size="9" fill="#64748b" font-weight="700">VERTICAL</text>
+    <rect x="178" y="16" width="8" height="128" rx="2" fill="#94a3b8"/>
+    <line x1="196" y1="18" x2="196" y2="144" stroke="${col}" stroke-width="10" stroke-linecap="round"/>
+    <line x1="196" y1="18" x2="196" y2="144" stroke="${stroke}" stroke-width="12" stroke-linecap="round" opacity="0.25"/>
+    <rect x="186" y="26" width="12" height="4" rx="1" fill="#475569"/>
+    <rect x="186" y="81" width="12" height="4" rx="1" fill="#475569"/>
+    <rect x="186" y="136" width="12" height="4" rx="1" fill="#475569"/>
+    <rect x="190" y="24" width="12" height="8" rx="1.5" fill="#374151" opacity="0.9"/>
+    <rect x="190" y="79" width="12" height="8" rx="1.5" fill="#374151" opacity="0.9"/>
+    <rect x="190" y="134" width="12" height="8" rx="1.5" fill="#374151" opacity="0.9"/>
+    <line x1="218" y1="28" x2="218" y2="83" stroke="#2563eb" stroke-width="1.5"/>
+    <polygon points="215,28 221,28 218,20" fill="#2563eb"/>
+    <polygon points="215,83 221,83 218,91" fill="#2563eb"/>
+    <text x="262" y="54" text-anchor="middle" font-size="12" font-weight="800" fill="#2563eb">${V}mm</text>
+    <text x="262" y="66" text-anchor="middle" font-size="9" fill="#64748b">max vertical</text>
+    <text x="262" y="78" text-anchor="middle" font-size="8" fill="#94a3b8">Table 4A1</text>
   </svg>`;
 }
 
 // ─── STATE ─────────────────────────────────────────────────────────────────
 const state = {
-  loadMode: 'amps',
-  loadAmps: '',
-  loadWatts: '',
-  powerFactor: '1',
-  length: '',
-  method: 'B',
-  cableType: 'pvc',
-  deviceType: 'mcb-b',
-  deviceRating: '',
-  groups: '1',
-  ambientTemp: '30',
-  circuitType: 'power',
-  result: null,
+  loadMode:'amps', loadAmps:'', loadWatts:'', powerFactor:'1',
+  length:'', method:'B', cableType:'pvc',
+  deviceType:'mcb-b', deviceRating:'', groups:'1',
+  ambientTemp:'30', circuitType:'power', result:null,
 };
 
-function s(field, val) { state[field] = val; calculate(); render(); }
+function s(field, val) { state[field]=val; calculate(); render(); }
 
 // ─── CALCULATION ENGINE ────────────────────────────────────────────────────
 function calculate() {
   state.result = null;
   let Ib;
-  if (state.loadMode === 'amps') {
+  if (state.loadMode==='amps') {
     Ib = parseFloat(state.loadAmps);
   } else {
-    const W = parseFloat(state.loadWatts);
-    const pf = parseFloat(state.powerFactor) || 1;
-    Ib = W / (230 * pf);
+    const W=parseFloat(state.loadWatts), pf=parseFloat(state.powerFactor)||1;
+    Ib = W/(230*pf);
   }
-  const L = parseFloat(state.length);
-  const In = parseFloat(state.deviceRating);
-  const groups = parseInt(state.groups) || 1;
-  const temp = parseInt(state.ambientTemp) || 30;
-  if (!Ib || Ib <= 0 || !L || L <= 0 || !In || In <= 0) return;
-  if (Ib > In) {
-    state.result = { error: `Design current (${Ib.toFixed(1)}A) exceeds device rating (${In}A). Increase device rating or reduce load.` };
-    return;
+  const L=parseFloat(state.length), In=parseFloat(state.deviceRating);
+  const groups=parseInt(state.groups)||1, temp=parseInt(state.ambientTemp)||30;
+  if (!Ib||Ib<=0||!L||L<=0||!In||In<=0) return;
+  if (Ib>In) { state.result={error:`Design current (${Ib.toFixed(1)}A) exceeds device rating (${In}A).`}; return; }
+
+  const methodRatings=(CCC[state.cableType]||CCC['pvc'])[state.method]||(CCC[state.cableType]||CCC['pvc'])['B'];
+  const vdTable=VDROP[state.cableType]||VDROP['pvc'];
+  const Ca=(TEMP_FACTORS[state.cableType]||TEMP_FACTORS['pvc'])[temp]||1.0;
+  const Cg=GROUP_FACTORS[Math.min(groups-1,9)];
+  const Cf=state.deviceType==='bs3036'?0.725:1.0;
+  const maxVdPct=state.circuitType==='lighting'?3.0:5.0;
+
+  let sel=-1;
+  for (let i=0;i<SIZES.length;i++) {
+    if (methodRatings[i]*Ca*Cg*Cf>=In && methodRatings[i]*Ca*Cg*Cf>=Ib) {sel=i;break;}
   }
-  const methodRatings = CCC[state.cableType][state.method] || CCC[state.cableType]['B'];
-  const vdTable = VDROP[state.cableType];
-  const Ca = (TEMP_FACTORS[state.cableType] || {})[temp] || 1.0;
-  const Cg = GROUP_FACTORS[Math.min(groups - 1, 9)];
-  const Cf = state.deviceType === 'bs3036' ? 0.725 : 1.0;
-  let selectedIdx = -1;
-  for (let i = 0; i < SIZES.length; i++) {
-    const Iz = methodRatings[i] * Ca * Cg * Cf;
-    if (Iz >= In && Iz >= Ib) { selectedIdx = i; break; }
-  }
-  if (selectedIdx === -1) {
-    state.result = { error: 'No standard cable size meets these requirements. Check your inputs or consider parallel cables.' };
-    return;
-  }
-  let vdCableIdx = selectedIdx, vdOverride = false;
-  const maxVdPct = state.circuitType === 'lighting' ? 3.0 : 5.0;
-  const Vd0 = (vdTable[selectedIdx] * Ib * L) / 1000;
-  if ((Vd0 / 230) * 100 > maxVdPct) {
-    for (let i = selectedIdx + 1; i < SIZES.length; i++) {
-      if (((vdTable[i] * Ib * L) / 1000 / 230) * 100 <= maxVdPct) { vdCableIdx = i; vdOverride = true; break; }
+  if (sel===-1) {state.result={error:'No standard cable size meets these requirements.'}; return;}
+
+  let fi=sel, vdUp=false;
+  if (((vdTable[sel]*Ib*L)/1000/230)*100>maxVdPct) {
+    for (let i=sel+1;i<SIZES.length;i++) {
+      if (((vdTable[i]*Ib*L)/1000/230)*100<=maxVdPct) {fi=i;vdUp=true;break;}
     }
   }
-  const fi = vdCableIdx;
-  const finalSize = SIZES[fi];
-  const finalIz = methodRatings[fi] * Ca * Cg * Cf;
-  const finalVd = (vdTable[fi] * Ib * L) / 1000;
-  const finalVdPct = (finalVd / 230) * 100;
-  const clip = clippingDist(state.cableType, finalSize);
-  state.result = {
-    Ib: Ib.toFixed(2), Ca: Ca.toFixed(2), Cg: Cg.toFixed(2), Cf,
-    In, size: finalSize, It: methodRatings[fi], Iz: finalIz.toFixed(1),
-    Vd: finalVd.toFixed(2), VdPct: finalVdPct.toFixed(1),
-    VdPass: finalVdPct <= maxVdPct, maxVdPct,
-    cpc: cpcSize(finalSize, state.cableType),
-    protectionOk: finalIz >= In,
-    vdUpgraded: vdOverride,
-    originalSize: vdOverride ? SIZES[selectedIdx] : null,
-    clipH: clip.H, clipV: clip.V,
+  const finalIz=methodRatings[fi]*Ca*Cg*Cf;
+  const finalVd=(vdTable[fi]*Ib*L)/1000;
+  const finalVdPct=(finalVd/230)*100;
+  const clip=clippingDist(state.cableType,SIZES[fi]);
+  state.result={
+    Ib:Ib.toFixed(2), Ca:Ca.toFixed(2), Cg:Cg.toFixed(2), Cf,
+    In, size:SIZES[fi], It:methodRatings[fi], Iz:finalIz.toFixed(1),
+    Vd:finalVd.toFixed(2), VdPct:finalVdPct.toFixed(1),
+    VdPass:finalVdPct<=maxVdPct, maxVdPct,
+    cpc:cpcSize(SIZES[fi],state.cableType),
+    protectionOk:finalIz>=In, vdUpgraded:vdUp,
+    originalSize:vdUp?SIZES[sel]:null,
+    clipH:clip.H, clipV:clip.V,
   };
 }
 
 // ─── RENDER ────────────────────────────────────────────────────────────────
 function render() {
-  document.getElementById('app').innerHTML = buildUI();
-  ['loadWatts','powerFactor'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el && el !== document.activeElement) el.value = state[id];
+  document.getElementById('app').innerHTML=buildUI();
+  ['loadWatts','powerFactor'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el&&el!==document.activeElement) el.value=state[id];
   });
 }
 
-function numOptions(from, to, suffix, stateVal) {
-  let out = '';
-  for (let i = from; i <= to; i++) out += `<option value="${i}" ${stateVal==i?'selected':''}>${i}${suffix}</option>`;
-  return out;
+function numOptions(from,to,suffix,stateVal) {
+  let o='';
+  for(let i=from;i<=to;i++) o+=`<option value="${i}" ${stateVal==i?'selected':''}>${i}${suffix}</option>`;
+  return o;
 }
 
 function buildUI() {
-  const r = state.result;
-  const meta = CABLE_META[state.cableType] || {};
-  const deviceRatings = DEVICE_RATINGS[state.deviceType] || [];
+  const r=state.result;
+  const meta=CABLE_META[state.cableType]||{};
+  const deviceRatings=DEVICE_RATINGS[state.deviceType]||[];
+  const isMfrNote = state.cableType==='ev'||state.cableType==='ev-swa'||state.cableType==='syy';
 
   return `
   <div class="header">
@@ -396,22 +311,21 @@ function buildUI() {
     <p>BS 7671:2018+A2:2022 · Single Phase 230V</p>
   </div>
 
-  <!-- Load -->
   <div class="card">
     <div class="card-title">Load</div>
     <div class="toggle-row">
       <div class="toggle-btn ${state.loadMode==='amps'?'active':''}" onclick="s('loadMode','amps')">Amps (A)</div>
       <div class="toggle-btn ${state.loadMode==='watts'?'active':''}" onclick="s('loadMode','watts')">Watts (W)</div>
     </div>
-    ${state.loadMode === 'amps' ? `
+    ${state.loadMode==='amps'?`
       <div class="field">
         <label>Design Current Ib (A)</label>
         <select onchange="s('loadAmps',this.value)">
-          <option value="">Select Ib (A)</option>
+          <option value="">Select Ib</option>
           ${numOptions(1,200,'A',state.loadAmps)}
         </select>
       </div>
-    ` : `
+    `:`
       <div class="row">
         <div><label>Load (W)</label><input id="loadWatts" inputmode="decimal" placeholder="e.g. 3000" oninput="s('loadWatts',this.value)"></div>
         <div><label>Power Factor</label><input id="powerFactor" inputmode="decimal" placeholder="1.0" oninput="s('powerFactor',this.value)"></div>
@@ -420,7 +334,7 @@ function buildUI() {
     <div class="field">
       <label>One-Way Circuit Length (m)</label>
       <select onchange="s('length',this.value)">
-        <option value="">Select length (m)</option>
+        <option value="">Select length</option>
         ${numOptions(1,200,'m',state.length)}
       </select>
     </div>
@@ -433,29 +347,38 @@ function buildUI() {
     </div>
   </div>
 
-  <!-- Cable & Install -->
   <div class="card">
     <div class="card-title">Cable &amp; Installation</div>
     <div class="field">
       <label>Cable Type</label>
       <select onchange="s('cableType',this.value)">
-        <option value="pvc"      ${state.cableType==='pvc'     ?'selected':''}>Twin &amp; Earth — 70°C PVC</option>
-        <option value="xlpe"     ${state.cableType==='xlpe'    ?'selected':''}>Multicore — 90°C XLPE / LSF</option>
-        <option value="swa-pvc"  ${state.cableType==='swa-pvc' ?'selected':''}>SWA — 70°C PVC insulated</option>
-        <option value="swa-xlpe" ${state.cableType==='swa-xlpe'?'selected':''}>SWA — 90°C XLPE insulated</option>
-        <option value="ev"       ${state.cableType==='ev'      ?'selected':''}>EV Ultra / H07RN-F — 90°C rubber flex</option>
-        <option value="ev-swa"   ${state.cableType==='ev-swa'  ?'selected':''}>EV Ultra SWA — armoured rubber flex</option>
+        <optgroup label="Standard">
+          <option value="pvc"      ${state.cableType==='pvc'     ?'selected':''}>Twin &amp; Earth — 70°C PVC</option>
+          <option value="xlpe"     ${state.cableType==='xlpe'    ?'selected':''}>Multicore — 90°C XLPE / LSF</option>
+          <option value="nyy"      ${state.cableType==='nyy'     ?'selected':''}>NYY — PVC/PVC Power Cable</option>
+        </optgroup>
+        <optgroup label="Armoured (SWA)">
+          <option value="swa-pvc"  ${state.cableType==='swa-pvc' ?'selected':''}>SWA — 70°C PVC insulated</option>
+          <option value="swa-xlpe" ${state.cableType==='swa-xlpe'?'selected':''}>SWA — 90°C XLPE insulated</option>
+        </optgroup>
+        <optgroup label="Flexible / EV">
+          <option value="h07rnf"   ${state.cableType==='h07rnf'  ?'selected':''}>H07RN-F — 90°C Rubber Flex</option>
+          <option value="ev"       ${state.cableType==='ev'      ?'selected':''}>EV Ultra Tuff Sheath</option>
+          <option value="ev-swa"   ${state.cableType==='ev-swa'  ?'selected':''}>EV Ultra SWA — Armoured</option>
+        </optgroup>
+        <optgroup label="Control / Screened">
+          <option value="syy"      ${state.cableType==='syy'     ?'selected':''}>S-YY — Screened Control Cable</option>
+        </optgroup>
       </select>
     </div>
-    <!-- Cable cross-section visual -->
     <div class="cable-visual">
-      ${cableSVG(state.cableType)}
+      ${cableVisual(state.cableType)}
       <div class="cable-visual-info">
         <div class="cable-visual-name">${meta.name||''}</div>
         <div class="cable-visual-desc">${meta.desc||''}</div>
       </div>
     </div>
-    ${state.cableType==='ev-swa'?`<div style="font-size:11px;color:#64748b;margin-bottom:12px">⚠ Verify Iz values against current Doncaster Cables datasheet</div>`:''}
+    ${isMfrNote?`<div class="warning-box" style="margin-bottom:12px">⚠ Verify Iz values against manufacturer datasheet before use</div>`:''}
     <div class="field">
       <label>Installation Method (BS 7671 Table 4A2)</label>
       <select onchange="s('method',this.value)">
@@ -481,7 +404,6 @@ function buildUI() {
     </div>
   </div>
 
-  <!-- Protective Device -->
   <div class="card">
     <div class="card-title">Protective Device</div>
     <div class="row">
@@ -507,15 +429,13 @@ function buildUI() {
     ${state.deviceType==='bs3036'?`<div class="warning-box">⚠️ BS 3036 fuse — 0.725 correction factor applied (Reg 433.1.1)</div>`:''}
   </div>
 
-  <!-- Results -->
-  ${r ? (r.error ? `
+  ${r?(r.error?`
     <div class="result-card fail">
       <div class="result-label">⚠ Cannot Calculate</div>
       <div style="font-size:13px;color:#dc2626;margin-top:4px">${r.error}</div>
     </div>
-  ` : `
-    ${r.vdUpgraded ? `<div class="warning-box">⬆ Cable upsized from ${r.originalSize}mm² to ${r.size}mm² to meet volt drop limit</div>` : ''}
-
+  `:`
+    ${r.vdUpgraded?`<div class="warning-box">⬆ Cable upsized from ${r.originalSize}mm² to ${r.size}mm² to meet volt drop limit</div>`:''}
     <div class="card" style="background:#1e293b">
       <div class="card-title" style="color:#94a3b8">Minimum Cable Size</div>
       <div style="display:flex;align-items:baseline;gap:6px">
@@ -524,7 +444,6 @@ function buildUI() {
       </div>
       <div style="font-size:12px;color:#64748b;margin-top:6px">CPC (Circuit Protective Conductor): ${r.cpc}mm²</div>
     </div>
-
     <div class="result-grid">
       <div class="result-card ${r.protectionOk?'pass':'fail'}">
         <div class="result-label">CCC (Iz)</div>
@@ -539,11 +458,9 @@ function buildUI() {
         <div class="result-note">${r.VdPass?'✓ Within '+r.maxVdPct+'%':'✗ Exceeds '+r.maxVdPct+'%'}</div>
       </div>
     </div>
-
-    <!-- Clipping Distances -->
     <div class="card">
       <div class="card-title">Cable Fixing Distances — BS 7671 Table 4A1</div>
-      ${clippingDiagramSVG(r.clipH, r.clipV, state.cableType)}
+      ${clippingDiagramSVG(r.clipH,r.clipV,state.cableType)}
       <div class="clip-dims">
         <div class="clip-dim">
           <div class="clip-dim-label">Horizontal</div>
@@ -556,9 +473,8 @@ function buildUI() {
           <div class="clip-dim-unit">mm max</div>
         </div>
       </div>
-      <div class="clip-note">For ${r.size}mm² ${(CABLE_META[state.cableType]||{}).name||''} — Method C clipped direct</div>
+      <div class="clip-note">For ${r.size}mm² ${(CABLE_META[state.cableType]||{}).name||''}</div>
     </div>
-
     <div class="card">
       <div class="card-title">Calculation Summary</div>
       <div class="info-row"><span>Design current Ib</span><span class="val">${r.Ib}A</span></div>
@@ -566,17 +482,14 @@ function buildUI() {
       <div class="info-row"><span>Cable tabulated CCC (It)</span><span class="val">${r.It}A</span></div>
       <div class="info-row"><span>Temp. correction (Ca)</span><span class="val">${r.Ca}</span></div>
       <div class="info-row"><span>Grouping factor (Cg)</span><span class="val">${r.Cg}</span></div>
-      ${r.Cf < 1 ? `<div class="info-row"><span>BS 3036 factor (Cf)</span><span class="val">${r.Cf}</span></div>` : ''}
+      ${r.Cf<1?`<div class="info-row"><span>BS 3036 factor (Cf)</span><span class="val">${r.Cf}</span></div>`:''}
       <div class="info-row"><span>Corrected CCC (Iz)</span><span class="val">${r.Iz}A</span></div>
       <div class="info-row"><span>Volt drop</span><span class="val">${r.Vd}V (${r.VdPct}%)</span></div>
       <div class="info-row"><span>CPC size</span><span class="val">${r.cpc}mm²</span></div>
     </div>
-  `) : `
-    <div class="card">
-      <div class="empty-result">Select Ib, length and device rating<br>to calculate cable size</div>
-    </div>
-  `}
-  `;
+  `):`
+    <div class="card"><div class="empty-result">Select Ib, length and device rating<br>to calculate cable size</div></div>
+  `}`;
 }
 
 render();
